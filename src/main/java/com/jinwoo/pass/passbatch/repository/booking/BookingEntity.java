@@ -37,13 +37,13 @@ public class BookingEntity extends BaseEntity {
     @JoinColumn(name = "userId", insertable = false, updatable = false)
     private UserEntity userEntity;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "passSeq", insertable = false, updatable = false)
-//    private PassEntity passEntity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "passSeq", insertable = false, updatable = false)
+    private PassEntity passEntity;
 
-    // endedAt 기준, yyyy-MM-HH 00:00:00
-//    public LocalDateTime getStatisticsAt() {
-//        return endedAt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-//    }
+//     endedAt 기준, yyyy-MM-HH 00:00:00
+    public LocalDateTime getStatisticsAt() {
+        return endedAt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+    }
 
 }
