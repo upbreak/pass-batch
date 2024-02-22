@@ -1,12 +1,9 @@
-package com.jinwoo.pass.passbatch.job.notification;
+package com.jinwoo.pass.passbatch.job.pass;
 
-import com.jinwoo.pass.passbatch.adapter.message.KakaoTalkMessageAdapter;
-import com.jinwoo.pass.passbatch.config.KakaoTalkMessageConfig;
 import com.jinwoo.pass.passbatch.config.TestBatchConfig;
 import com.jinwoo.pass.passbatch.repository.booking.BookingEntity;
 import com.jinwoo.pass.passbatch.repository.booking.BookingRepository;
 import com.jinwoo.pass.passbatch.repository.booking.BookingStatus;
-import com.jinwoo.pass.passbatch.repository.notification.NotificationRepository;
 import com.jinwoo.pass.passbatch.repository.pass.PassEntity;
 import com.jinwoo.pass.passbatch.repository.pass.PassRepository;
 import com.jinwoo.pass.passbatch.repository.pass.PassStatus;
@@ -27,34 +24,28 @@ import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBatchTest
 @SpringBootTest
 @ActiveProfiles("test")
-@ContextConfiguration(classes = {
-        TestBatchConfig.class,
-        SendNotificationBeforeClassJobConfig.class,
-        SendNotificationItemWriter.class,
-        KakaoTalkMessageConfig.class,
-        KakaoTalkMessageAdapter.class
-})
-class SendNotificationBeforeClassJobConfigTest {
-    public final JobLauncherTestUtils jobLauncherTestUtils;
-    public final PassRepository passRepository;
+@ContextConfiguration(classes = {UsePassJobConfig.class, TestBatchConfig.class, PassRepository.class, BookingRepository.class})
+class UsePassJobConfigTest {
+
+    private final JobLauncherTestUtils jobLauncherTestUtils;
+    private final PassRepository passRepository;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
 
-    public SendNotificationBeforeClassJobConfigTest(
+    public UsePassJobConfigTest(
             @Autowired JobLauncherTestUtils jobLauncherTestUtils
-            , @Autowired BookingRepository bookingRepository
-            , @Autowired UserRepository userRepository
             , @Autowired PassRepository passRepository
-    ) {
+            , @Autowired BookingRepository bookingRepository
+            , @Autowired UserRepository userRepository) {
         this.jobLauncherTestUtils = jobLauncherTestUtils;
+        this.passRepository = passRepository;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
-        this.passRepository = passRepository;
     }
 
     @Test
@@ -63,7 +54,7 @@ class SendNotificationBeforeClassJobConfigTest {
         addBookingEntity();
 
         // When
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("addNotificationStep");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Step");
 
         // Then
         assertThat(jobExecution.getExitStatus()).isEqualTo(ExitStatus.COMPLETED);
@@ -93,9 +84,10 @@ class SendNotificationBeforeClassJobConfigTest {
         BookingEntity bookingEntity = new BookingEntity();
         bookingEntity.setPassSeq(passEntity.getPassSeq());
         bookingEntity.setUserId(userId);
-        bookingEntity.setStatus(BookingStatus.READY);
-        bookingEntity.setStartedAt(now.plusMinutes(10));
-        bookingEntity.setEndedAt(bookingEntity.getStartedAt().plusMinutes(50));
+        bookingEntity.setStatus(BookingStatus.COMPLETED);
+        bookingEntity.setStartedAt(now.minusDays(10));
+        bookingEntity.setUsedPass(false);
+        bookingEntity.setEndedAt(now.minusMinutes(10));
         bookingRepository.save(bookingEntity);
 
     }
