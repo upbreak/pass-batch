@@ -29,6 +29,7 @@ public class AddPassJobConfig {
     public Step addPassStep(JobRepository jobRepository, PlatformTransactionManager platformTransactionManager){
         return new StepBuilder("addPassStep", jobRepository)
                 .tasklet(addPassTasklet, platformTransactionManager)
+                .allowStartIfComplete(true)
                 .build();
     }
 }
